@@ -1,5 +1,6 @@
 import React from 'react'
 import { DollarSign, Clock, TrendingUp } from 'lucide-react'
+import Link from 'next/link'
 
 const Features = () => {
 
@@ -22,7 +23,7 @@ const Features = () => {
   ]
   
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 sm:px-6 lg:px-10 py-0 md:py-10 lg:py-12">
       <div className="w-full max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl text-[#246a99] font-bold mb-4">
@@ -57,12 +58,6 @@ const Features = () => {
               </div>
             )
           })}
-        </div>
-
-        <div className="flex justify-center">
-          <button className="bg-[#3d6e8f] text-white font-bold text-lg px-10 py-4 rounded-lg hover:bg-[#2d5e7f] transition-colors shadow-md hover:shadow-xl">
-            See Your Savings Now
-          </button>
         </div>
       </div>
     </div>

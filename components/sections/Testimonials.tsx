@@ -30,7 +30,7 @@ const Testimonials = () => {
     ]
     
     return (
-        <div className='w-full mt-10 py-16 bg-[#F7F7F7]'>
+        <div className='w-full py-16 bg-[#F7F7F7]'>
             <div className='w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
                 <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold text-[#246a99] text-center mb-12'>
                     What Our Customers Say

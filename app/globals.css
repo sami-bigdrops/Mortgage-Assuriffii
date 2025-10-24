@@ -4,6 +4,10 @@
   --background: #ffffff;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 @theme inline {
   --color-background: var(--background);
   --font-sans: var(--font-mulish);

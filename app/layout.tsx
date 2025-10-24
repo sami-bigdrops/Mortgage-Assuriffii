@@ -15,6 +15,9 @@ const playfair_display = Playfair_Display({
 export const metadata: Metadata = {
   title: "Mortgage - Assuriffii",
   description: "Assuriffii is a trusted mortgage provider in the USA offering home loans, cash-out refinancing, and easy solutions to buy a home. Get the best mortgage rates, compare lenders, and secure your home financing online with Assuriffii.",
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
