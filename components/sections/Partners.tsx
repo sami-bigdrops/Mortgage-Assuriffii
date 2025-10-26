@@ -9,16 +9,16 @@ const Partners = () => {
             image: '/amerisave-logo.svg'
         },
         {
-            name: 'Loan Depot',
-            image: '/loandepot-logo.svg'
-        },
-        {
             name: 'Veterans First Mortgage',
             image: '/veterans-logo.svg'
         },
         {
             name: 'Mutual of Omaha',
             image: '/mutual-logo.svg'
+        },
+        {
+            name: 'Loan Depot',
+            image: '/loandepot-logo.svg'
         },
     ]
 
