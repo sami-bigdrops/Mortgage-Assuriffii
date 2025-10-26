@@ -35,7 +35,7 @@ const Partners = () => {
                         alt={partner.name} 
                         width={50} 
                         height={50} 
-                        className='w-40 h-40 object-contain'
+                        className='w-40 h-40 md:w-50 md:h-50 lg:w-55 lg:h-55 object-contain'
                         loading="lazy"
                     />
                 </div>

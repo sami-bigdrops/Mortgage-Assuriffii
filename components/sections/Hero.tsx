@@ -127,7 +127,7 @@ const Hero = () => {
           {/* Content */}
           <div className='max-w-2xl space-y-8 mx-auto lg:mx-0 py-0 lg:py-16'>
             <h1 className='text-[32px] font-[800] text-[#12266D] leading-tight text-center lg:text-left max-w-[360px] lg:max-w-none mx-auto lg:mx-0'>
-              Let&apos;s drop your rate{cityName ? ` in ${cityName}` : ''} today!
+            See how much cash your{cityName ? ` ${cityName}` : ' city'} home could unlock today!
             </h1>
             
             <div className='bg-[#12266D] rounded-xl p-6 sm:p-8 max-w-2xl mx-auto lg:mx-0 shadow-2xl'>
