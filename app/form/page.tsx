@@ -38,7 +38,7 @@ function FormContent() {
   const selectionScreen = (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 px-4 pt-12 md:pt-24 pb-8 md:pb-12">
       <div className="w-full max-w-5xl mx-auto">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-center text-[#246a99] mb-8 md:mb-16 font-serif">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-center text-[#246a99] mb-8 md:mb-16 font-sans">
           I&apos;m looking to:
         </h1>
 

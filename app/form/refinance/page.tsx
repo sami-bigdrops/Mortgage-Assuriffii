@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import Refinance from '@/app/form/products/Refinance'
+import RefinanceWrapper from '@/app/form/products/Refinance'
 
 export default function RefinancePage() {
-  return <Refinance />
+  return <RefinanceWrapper />
 }

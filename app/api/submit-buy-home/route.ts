@@ -3,15 +3,28 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    const { searchParams } = new URL(request.url)
     
-    const { productType, state, zipCode, propertyType, creditGrade, foundHome, timelineToBuy, estimatedHomeValue, downPayment, loanType, bankruptcyOrForeclosure, currentlyEmployed, lateMortgagePayments, veteranStatus, email, firstName, lastName, address, city, addressState, addressZip, phoneNumber } = body
+    // Get addressZip from URL parameter (priority 1) or request body
+    const urlZipCode = searchParams.get('zip_code')
+    const addressZip = urlZipCode || body.addressZip || ''
+    
+    const { productType, state, propertyZipCode, propertyType, creditGrade, foundHome, timelineToBuy, estimatedHomeValue, downPayment, loanType, bankruptcyOrForeclosure, currentlyEmployed, lateMortgagePayments, veteranStatus, email, firstName, lastName, address, city, addressState, phoneNumber } = body
+    
+    // Validate that we have addressZip (from URL or body)
+    if (!addressZip || addressZip.length !== 5) {
+      return NextResponse.json(
+        { error: 'Address zip code is required. Please provide zip_code in URL or addressZip in request body.', missingFields: ['addressZip'] },
+        { status: 400 }
+      )
+    }
 
     // Validate required fields
-    if (!productType || !state || !zipCode || !propertyType || !creditGrade || !foundHome || !timelineToBuy || !estimatedHomeValue || !downPayment || !loanType || !bankruptcyOrForeclosure || !currentlyEmployed || !lateMortgagePayments || !veteranStatus || !email || !firstName || !lastName || !address || !city || !addressState || !addressZip || !phoneNumber) {
+    if (!productType || !state || !propertyZipCode || !propertyType || !creditGrade || !foundHome || !timelineToBuy || !estimatedHomeValue || !downPayment || !loanType || !bankruptcyOrForeclosure || !currentlyEmployed || !lateMortgagePayments || !veteranStatus || !email || !firstName || !lastName || !address || !city || !addressState || !phoneNumber) {
       const missingFields = [];
       if (!productType) missingFields.push('productType');
       if (!state) missingFields.push('state');
-      if (!zipCode) missingFields.push('zipCode');
+      if (!propertyZipCode) missingFields.push('propertyZipCode');
       if (!propertyType) missingFields.push('propertyType');
       if (!creditGrade) missingFields.push('creditGrade');
       if (!foundHome) missingFields.push('foundHome');
@@ -29,7 +42,6 @@ export async function POST(request: NextRequest) {
       if (!address) missingFields.push('address');
       if (!city) missingFields.push('city');
       if (!addressState) missingFields.push('addressState');
-      if (!addressZip) missingFields.push('addressZip');
       if (!phoneNumber) missingFields.push('phoneNumber');
       return NextResponse.json(
         { error: 'All fields are required', missingFields },
@@ -70,7 +82,7 @@ export async function POST(request: NextRequest) {
       email: email.trim(),
       productType: productType.trim(),
       state: state.trim(),
-      zipCode: zipCode.trim(),
+      propertyZipCode: propertyZipCode.trim(),
       propertyType: propertyType.trim(),
       creditGrade: creditGrade.trim(),
       foundHome: foundHome.trim(),
@@ -85,7 +97,7 @@ export async function POST(request: NextRequest) {
       address: address.trim(),
       city: city.trim(),
       addressState: addressState.trim(),
-      addressZip: addressZip.trim(),
+      addressZip: addressZip.trim(), // From URL or localStorage
       phoneNumber: phoneNumber.trim(),
       ip_address: ip,
       user_agent: request.headers.get('user-agent') || '',
@@ -127,7 +139,7 @@ export async function POST(request: NextRequest) {
       const successResponse = { 
         success: true, 
         message: 'Form submitted successfully',
-        redirectUrl: '',
+        redirectUrl: '/thankyou',
         leadProsperStatus: result.status,
         accessToken,
         expiresAt

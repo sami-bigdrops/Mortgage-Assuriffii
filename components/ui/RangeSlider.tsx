@@ -42,7 +42,7 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
   }
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseInt(e.target.value)
+    const newValue = parseFloat(e.target.value)
     
     // Only apply smart stepping for large values (home values)
     if (max > 100000) {
@@ -52,9 +52,13 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
       setCurrentValue(adjustedValue)
       onChange(adjustedValue)
     } else {
-      // For percentages or smaller values, use as-is
-      setCurrentValue(newValue)
-      onChange(newValue)
+      // For percentages or smaller values (including decimals), round to step precision
+      // Handle floating point precision by rounding to appropriate decimal places
+      const stepPrecision = step < 1 ? (step.toString().split('.')[1]?.length || 0) : 0
+      const adjustedValue = Math.round((newValue / step)) * step
+      const roundedValue = stepPrecision > 0 ? parseFloat(adjustedValue.toFixed(stepPrecision)) : adjustedValue
+      setCurrentValue(roundedValue)
+      onChange(roundedValue)
     }
   }
 

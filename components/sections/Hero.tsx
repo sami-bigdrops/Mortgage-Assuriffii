@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import { validateZipCode } from '@/utils/validation'
 
 const Hero = () => {
   const [zipCode, setZipCode] = useState('')
-  const [cityName, setCityName] = useState('')
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+  const [zipCodeError, setZipCodeError] = useState<string>('')
 
   // Function to fetch user location using server-side IP detection (same as LeadProsper)
   const fetchUserLocation = useCallback(async () => {
@@ -27,17 +28,14 @@ const Hero = () => {
       
       const data = await response.json()
       
-      if (data.city && data.zipCode) {
-        setCityName(data.city)
+      if (data.zipCode) {
         setZipCode(data.zipCode)
       } else {
         // Keep empty if location not available
-        setCityName('')
         setZipCode('')
       }
     } catch {
       // Keep empty on error
-      setCityName('')
       setZipCode('')
     } finally {
       setIsLoadingLocation(false)
@@ -69,9 +67,10 @@ const Hero = () => {
 
   // Function to handle redirect
   const handleContinue = () => {
-    // Validate ZIP code is exactly 5 digits
-    if (!/^\d{5}$/.test(zipCode)) {
-      alert('Please enter a valid 5-digit ZIP code')
+    // Validate ZIP code using validation utility
+    const validation = validateZipCode(zipCode)
+    if (!validation.valid) {
+      setZipCodeError(validation.error || 'Please enter a valid 5-digit ZIP code')
       return
     }
 
@@ -127,12 +126,12 @@ const Hero = () => {
           {/* Content */}
           <div className='max-w-2xl space-y-8 mx-auto lg:mx-0 py-0 lg:py-16'>
             <h1 className='text-[32px] font-[800] text-[#12266D] leading-tight text-center lg:text-left max-w-[360px] lg:max-w-none mx-auto lg:mx-0'>
-            See how much cash your{cityName ? ` ${cityName}` : ' city'} home could unlock today!
+            See how much cash your home could unlock today!
             </h1>
             
             <div className='bg-[#12266D] rounded-xl p-6 sm:p-8 max-w-2xl mx-auto lg:mx-0 shadow-2xl'>
               <p className='text-white font-[800] text-[18px] mb-6'>
-                What is your ZIP Code?
+                What is your current ZIP Code?
               </p>
               
               {/* Mobile: Stacked layout */}
@@ -146,19 +145,38 @@ const Hero = () => {
                     // Only allow digits and limit to 5 characters
                     if (/^\d{0,5}$/.test(value)) {
                       setZipCode(value)
+                      // Clear error when user starts typing
+                      if (zipCodeError) {
+                        setZipCodeError('')
+                      }
+                    }
+                  }}
+                  onBlur={() => {
+                    const validation = validateZipCode(zipCode)
+                    if (!validation.valid) {
+                      setZipCodeError(validation.error || '')
+                    } else {
+                      setZipCodeError('')
                     }
                   }}
                   onKeyPress={handleKeyPress}
                   disabled={isLoadingLocation}
-                  className={`w-full px-4 py-4 text-gray-900 text-[18px] font-[600] rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-200 h-14 ${
+                  className={`w-full px-4 py-4 text-gray-900 text-[18px] font-[600] rounded-lg border transition-all duration-200 h-14 bg-white focus:outline-none focus:ring-2 ${
+                    zipCodeError
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300 focus:ring-orange-400 focus:border-orange-400'
+                  } ${
                     isLoadingLocation ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 />
+                {zipCodeError && (
+                  <p className="mt-2 text-sm text-red-600 font-medium">{zipCodeError}</p>
+                )}
                 <button 
                   onClick={handleContinue}
-                  disabled={isLoadingLocation || !/^\d{5}$/.test(zipCode)}
+                  disabled={isLoadingLocation || !validateZipCode(zipCode).valid}
                   className={`w-full px-4 py-4 rounded-lg font-[600] transition-all duration-200 flex items-center justify-center gap-2 text-[18px] h-14 text-white ${
-                    isLoadingLocation || !/^\d{5}$/.test(zipCode)
+                    isLoadingLocation || !validateZipCode(zipCode).valid
                       ? 'bg-gray-400 cursor-not-allowed' 
                       : 'bg-[#F7782B] hover:bg-[#e06c27]'
                   }`}
@@ -177,44 +195,65 @@ const Hero = () => {
               </div>
 
               {/* Tablet and Desktop: Button inside input */}
-              <div className='hidden sm:block relative'>
-                <input
-                  type='text'
-                  placeholder={isLoadingLocation ? 'Detecting your location...' : 'Zip Code e.g. 11102'}
-                  value={zipCode}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    // Only allow digits and limit to 5 characters
-                    if (/^\d{0,5}$/.test(value)) {
-                      setZipCode(value)
-                    }
-                  }}
-                  onKeyPress={handleKeyPress}
-                  disabled={isLoadingLocation}
-                  className={`w-full px-4 py-4 pr-32 text-gray-900 text-[18px] font-[600] rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-200 h-18 ${
-                    isLoadingLocation ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                />
-                <button 
-                  onClick={handleContinue}
-                  disabled={isLoadingLocation || !/^\d{5}$/.test(zipCode)}
-                  className={`absolute right-0 top-0 px-14 py-2 rounded-r-lg font-[600] transition-all duration-200 flex items-center gap-2 text-[18px] h-18 text-white ${
-                    isLoadingLocation || !/^\d{5}$/.test(zipCode)
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-[#F7782B] hover:bg-[#e06c27]'
-                  }`}
-                >
-                  {isLoadingLocation ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin text-white font-[800]"></div>
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      Continue <ArrowRight className='w-4 h-4 text-white font-[600]' />
-                    </>
-                  )}
-                </button>
+              <div className='hidden sm:block'>
+                <div className='relative'>
+                  <input
+                    type='text'
+                    placeholder={isLoadingLocation ? 'Detecting your location...' : 'Zip Code e.g. 11102'}
+                    value={zipCode}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      // Only allow digits and limit to 5 characters
+                      if (/^\d{0,5}$/.test(value)) {
+                        setZipCode(value)
+                        // Clear error when user starts typing
+                        if (zipCodeError) {
+                          setZipCodeError('')
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      const validation = validateZipCode(zipCode)
+                      if (!validation.valid) {
+                        setZipCodeError(validation.error || '')
+                      } else {
+                        setZipCodeError('')
+                      }
+                    }}
+                    onKeyPress={handleKeyPress}
+                    disabled={isLoadingLocation}
+                    className={`w-full px-4 py-4 pr-32 text-gray-900 text-[18px] font-[600] rounded-lg border transition-all duration-200 h-18 bg-white focus:outline-none focus:ring-2 ${
+                      zipCodeError
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                        : 'border-gray-300 focus:ring-orange-400 focus:border-orange-400'
+                    } ${
+                      isLoadingLocation ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  />
+                  <button 
+                    onClick={handleContinue}
+                    disabled={isLoadingLocation || !validateZipCode(zipCode).valid}
+                    className={`absolute right-0 top-0 px-14 py-2 rounded-r-lg font-[600] transition-all duration-200 flex items-center gap-2 text-[18px] h-18 text-white ${
+                      isLoadingLocation || !validateZipCode(zipCode).valid
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-[#F7782B] hover:bg-[#e06c27]'
+                    }`}
+                  >
+                    {isLoadingLocation ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin text-white font-[800]"></div>
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        Continue <ArrowRight className='w-4 h-4 text-white font-[600]' />
+                      </>
+                    )}
+                  </button>
+                </div>
+                {zipCodeError && (
+                  <p className="mt-2 text-sm text-red-600 font-medium">{zipCodeError}</p>
+                )}
               </div>
             </div>
           </div>
