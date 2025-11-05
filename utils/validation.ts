@@ -44,7 +44,7 @@ export function validateZipCode(zipCode: string): { valid: boolean; error?: stri
  * Common email typos to detect and suggest corrections
  */
 const EMAIL_TYPO_PATTERNS: Array<{ pattern: RegExp; suggestion: string }> = [
-  { pattern: /@gg?mail\.com$/i, suggestion: '@gmail.com' },
+  { pattern: /@ggmail\.com$/i, suggestion: '@gmail.com' },
   { pattern: /@gmial\.com$/i, suggestion: '@gmail.com' },
   { pattern: /@gmail\.con$/i, suggestion: '@gmail.com' },
   { pattern: /@gmail\.coms$/i, suggestion: '@gmail.com' },
@@ -61,7 +61,7 @@ const EMAIL_TYPO_PATTERNS: Array<{ pattern: RegExp; suggestion: string }> = [
   { pattern: /@hotmai\.com$/i, suggestion: '@hotmail.com' },
   { pattern: /@hotmail\.con$/i, suggestion: '@hotmail.com' },
   { pattern: /@hotmail\.coms$/i, suggestion: '@hotmail.com' },
-  { pattern: /\.coms?$/i, suggestion: '.com' },
+  { pattern: /\.coms$/i, suggestion: '.com' },
   { pattern: /\.con$/i, suggestion: '.com' },
   { pattern: /\.coom$/i, suggestion: '.com' },
   { pattern: /\.comm$/i, suggestion: '.com' },

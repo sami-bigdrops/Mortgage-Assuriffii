@@ -60,7 +60,7 @@ export default function ThankYouPage() {
             {/* Assurifii Auto Card */}
             <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100 group">
               {/* Logo Header */}
-              <div className="bg-gradient-to-br from-orange-500 via-orange-400 to-orange-500 px-6 md:px-8 py-8 md:py-10">
+              <div className="bg-gradient-to-br from-blue-500 via-blue-400 to-blue-500 px-6 md:px-8 py-8 md:py-10">
                 <div className="flex justify-center items-center">
                   <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
                     <Image 
@@ -86,12 +86,12 @@ export default function ThankYouPage() {
                 </p>
 
                 {/* Fact/Stat */}
-                <div className="bg-orange-50 rounded-xl p-5 md:p-6 mb-6 border-2 border-orange-200">
-                  <p className="text-sm md:text-base font-bold text-orange-900 mb-2 text-center">
+                <div className="bg-blue-50 rounded-xl p-5 md:p-6 mb-6 border-2 border-blue-200">
+                  <p className="text-sm md:text-base font-bold text-blue-900 mb-2 text-center">
                     💡 Did You Know?
                   </p>
-                  <p className="text-base md:text-lg text-orange-800 text-center font-semibold">
-                    Our customers save an average of $150/month on auto loans
+                  <p className="text-base md:text-lg text-blue-800 text-center font-semibold">
+                    Our customers save an average of $150/month on auto insurance
                   </p>
                 </div>
 
@@ -102,7 +102,7 @@ export default function ThankYouPage() {
                   className="flex items-center justify-center gap-2 w-full px-6 py-4 bg-gradient-to-r from-[#3498DB] to-[#246a99] text-white rounded-xl font-bold text-base md:text-lg
                     hover:from-[#246a99] hover:to-[#1a4d6b] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group-hover:shadow-2xl"
                 >
-                  Explore Auto Loans
+                  Explore Auto Insurance
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -115,7 +115,7 @@ export default function ThankYouPage() {
                 <div className="flex justify-center items-center">
                   <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
                     <Image 
-                      src="/home-assurifii.svg" 
+                      src="/auto-assurifii.svg" 
                       alt="Assurifii Home" 
                       width={180} 
                       height={80}

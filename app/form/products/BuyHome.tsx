@@ -150,53 +150,58 @@ const BuyHome = () => {
   const handleNext = async () => {
     if (isStepValid()) {
       if (currentStep === 17) {
-        // Submit form
+        // Submit form - Bypass LeadProsper submission, directly redirect to thank you page
         setIsSubmitting(true)
-        try {
-          // Get addressZip from URL or localStorage (this is for the address)
-          let addressZip = ''
-          const urlZip = searchParams.get('zip_code')
-          if (urlZip && urlZip.length === 5) {
-            addressZip = urlZip
-            // Also store in localStorage for fallback
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('zip_code', urlZip)
-            }
-          } else if (typeof window !== 'undefined') {
-            const storedZip = localStorage.getItem('zip_code')
-            if (storedZip && storedZip.length === 5) {
-              addressZip = storedZip
-            }
-          }
+        
+        // Direct redirect to thank you page
+        router.push('/thankyou')
+        
+        // COMMENTED OUT: LeadProsper API submission
+        // try {
+        //   // Get addressZip from URL or localStorage (this is for the address)
+        //   let addressZip = ''
+        //   const urlZip = searchParams.get('zip_code')
+        //   if (urlZip && urlZip.length === 5) {
+        //     addressZip = urlZip
+        //     // Also store in localStorage for fallback
+        //     if (typeof window !== 'undefined') {
+        //       localStorage.setItem('zip_code', urlZip)
+        //     }
+        //   } else if (typeof window !== 'undefined') {
+        //     const storedZip = localStorage.getItem('zip_code')
+        //     if (storedZip && storedZip.length === 5) {
+        //       addressZip = storedZip
+        //     }
+        //   }
 
-          const formDataToSubmit = {
-            ...formData,
-            addressZip: addressZip, // Use zip code from URL/localStorage for address
-          }
+        //   const formDataToSubmit = {
+        //     ...formData,
+        //     addressZip: addressZip, // Use zip code from URL/localStorage for address
+        //   }
 
-          const response = await fetch('/api/submit-buy-home', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formDataToSubmit),
-          })
+        //   const response = await fetch('/api/submit-buy-home', {
+        //     method: 'POST',
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(formDataToSubmit),
+        //   })
 
-          const result = await response.json()
+        //   const result = await response.json()
 
-          if (result.success) {
-            // Redirect to thank you page (from API response or default)
-            const redirectUrl = result.redirectUrl || '/thankyou'
-            router.push(redirectUrl)
-          } else {
-            alert('Form submission failed. Please try again.')
-            setIsSubmitting(false)
-          }
-        } catch (error) {
-          console.error('Error submitting form:', error)
-          alert('An error occurred. Please try again.')
-          setIsSubmitting(false)
-        }
+        //   if (result.success) {
+        //     // Redirect to thank you page (from API response or default)
+        //     const redirectUrl = result.redirectUrl || '/thankyou'
+        //     router.push(redirectUrl)
+        //   } else {
+        //     alert('Form submission failed. Please try again.')
+        //     setIsSubmitting(false)
+        //   }
+        // } catch (error) {
+        //   console.error('Error submitting form:', error)
+        //   alert('An error occurred. Please try again.')
+        //   setIsSubmitting(false)
+        // }
       } else {
         setCurrentStep(prev => prev + 1)
     console.log('Form data:', formData)
