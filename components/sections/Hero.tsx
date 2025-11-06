@@ -104,7 +104,7 @@ const Hero = () => {
   }
 
   return (
-    <div className='w-full min-h-content sm:min-h-[800px] xl:min-h-[400px] bg-gradient-to-b from-[#8EC4F6] to-[#FFF] flex flex-col relative pb-20 lg:py-20'>
+    <div className='w-full min-h-content sm:min-h-[1000px] xl:min-h-[400px] bg-gradient-to-b from-[#8EC4F6] to-[#FFF] flex flex-col relative pb-20 lg:py-20'>
       {/* Background Illustration */}
         <div className='w-full absolute right-0 top-[85%] xl:top-1/2 md:top-1/2 transform lg:-translate-y-1/2 z-0 max-w-3xl mx-auto'>
         <Image
@@ -112,7 +112,7 @@ const Hero = () => {
           height={1000}
           src='/landing-illustration.svg'
           alt='Modern city skyline with eco-friendly buildings'
-          className='w-full h-auto max-h-[1000px] sm:max-h-[400px] lg:max-h-[700px] xl:max-h-[700px] object-contain'
+          className='w-full h-auto max-h-[1000px] sm:max-h-[400px] md:max-h-[700px] xl:max-h-[700px] object-contain'
           priority
           quality={90}
           loading="eager"
