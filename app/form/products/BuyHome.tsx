@@ -706,75 +706,102 @@ const BuyHome = () => {
                 onChange={(value) => handleInputChange('phoneNumber', value)}
                 onBlur={() => validateField('phoneNumber', formData.phoneNumber)}
                 error={errors.phoneNumber}
-            required
-            className="mb-8"
-          />
+                required
+                className="mb-8"
+              />
+
+              {/* Navigation Buttons - Step 17 */}
+              <div className="flex gap-4 mb-8">
+                {currentStep > 1 && (
+                  <button
+                    onClick={handleBack}
+                    className="px-6 py-4 rounded-xl font-bold text-base md:text-lg
+                      border-2 border-gray-300 text-gray-700 hover:border-[#3498DB] hover:text-[#3498DB]
+                      transition-all duration-300 hover:shadow-lg flex items-center gap-2"
+                  >
+                    <ArrowLeft size={20} />
+                    Back
+                  </button>
+                )}
+                <button
+                  onClick={handleNext}
+                  disabled={!isStepValid() || isSubmitting}
+                  className={`
+                    flex-1 py-4 rounded-xl font-bold text-base md:text-lg
+                    transition-all duration-300 flex items-center justify-center gap-2
+                    ${
+                      !isStepValid() || isSubmitting
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#3498DB] text-white hover:bg-[#246a99] shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer'
+                    }
+                  `}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Details'
+                  )}
+                </button>
+              </div>
 
               {/* Disclaimer */}
               <div className="mb-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-800 mb-2">Data Submission Notice</h3>
                 <p className="text-xs text-gray-600 leading-relaxed">
-                  By submitting this form, you consent to the collection and processing of your personal information 
-                  for mortgage application purposes. Your data will be used to connect you with qualified lenders 
-                  and provide you with relevant mortgage options. We respect your privacy and will handle your 
-                  information in accordance with our privacy policy.
+                By clicking Submit Details, you agree to: (1) our TERMS OF USE, which include a Class Waiver and Mandatory Arbitration Agreement, (2) our PRIVACY POLICY, and (3) receive notices and other COMMUNICATIONS ELECTRONICALLY. By clicking Submit Details, you: (a) provide your express written consent and binding signature under the ESIGN Act for Leadpoint, Inc. dba SecureRights, a Delaware corporation, to share your information with up to four (4) of its PREMIER PARTNERS and/or third parties acting on their behalf to contact you via telephone, mobile device (including SMS and MMS) and/or email, including but not limited to texts or calls made using an automated telephone dialing system, AI-generated voice and text messages, or pre-recorded or artificial voice messages, regarding financial services or other offers related to homeownership; (b) understand that your consent is valid even if your telephone number is currently listed on any state, federal, local or corporate Do Not Call list; (c) represent that you are the wireless subscriber or customary user of the wireless number(s) provided with authority to consent; (d) understand your consent is not required in order to obtain any good or service; (e) represent that you have received and reviewed the MORTGAGE BROKER DISCLOSURES for your state; and (f) provide your consent under the Fair Credit Reporting Act for SecureRights and/or its PREMIER PARTNERS to obtain information from your personal credit profile to prequalify you for credit options and connect you with an appropriate partner. You may choose to speak with an individual service provider by dialing (844) 326-3442. Leadpoint, Inc. NMLS 3175.
                 </p>
               </div>
             </>
           )}
 
-          {/* Navigation Buttons */}
-          <div className="flex gap-4">
-            {currentStep > 1 && (
-              <button
-                onClick={handleBack}
-                className="px-6 py-4 rounded-xl font-bold text-base md:text-lg
-                  border-2 border-gray-300 text-gray-700 hover:border-[#3498DB] hover:text-[#3498DB]
-                  transition-all duration-300 hover:shadow-lg flex items-center gap-2"
-              >
-                <ArrowLeft size={20} />
-                Back
-              </button>
-            )}
-            {/* Only show Continue/Submit button for non-radio button steps or final step */}
-            {(() => {
-              // Steps with radio buttons that auto-advance: 3, 4, 5, 6, 9, 10, 11, 12, 13
-              const radioButtonSteps = [3, 4, 5, 6, 9, 10, 11, 12, 13]
-              const hasRadioButton = radioButtonSteps.includes(currentStep)
-              
-              // Show button for final step (submit) or steps without radio buttons
-              if (currentStep === 17 || !hasRadioButton) {
-                const isSubmitStep = currentStep === 17
-                const isDisabled = !isStepValid() || (isSubmitStep && isSubmitting)
-                return (
-            <button
-              onClick={handleNext}
-                    disabled={isDisabled}
-              className={`
-                      ${currentStep > 1 ? '' : 'flex-1'} py-4 rounded-xl font-bold text-base md:text-lg
-                transition-all duration-300 flex items-center justify-center gap-2
-                ${
-                        !isDisabled
-                    ? 'bg-[#3498DB] text-white hover:bg-[#246a99] shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          {/* Navigation Buttons - All other steps */}
+          {currentStep !== 17 && (
+            <div className="flex gap-4">
+              {currentStep > 1 && (
+                <button
+                  onClick={handleBack}
+                  className="px-6 py-4 rounded-xl font-bold text-base md:text-lg
+                    border-2 border-gray-300 text-gray-700 hover:border-[#3498DB] hover:text-[#3498DB]
+                    transition-all duration-300 hover:shadow-lg flex items-center gap-2"
+                >
+                  <ArrowLeft size={20} />
+                  Back
+                </button>
+              )}
+              {/* Only show Continue/Submit button for steps without radio buttons */}
+              {(() => {
+                // Steps with radio buttons that auto-advance: 3, 4, 5, 6, 9, 10, 11, 12, 13
+                const radioButtonSteps = [3, 4, 5, 6, 9, 10, 11, 12, 13]
+                const hasRadioButton = radioButtonSteps.includes(currentStep)
+                
+                // Show button for steps without radio buttons (step 17 is handled separately)
+                if (!hasRadioButton) {
+                  const isDisabled = !isStepValid()
+                  return (
+                    <button
+                      onClick={handleNext}
+                      disabled={isDisabled}
+                      className={`
+                        ${currentStep > 1 ? '' : 'flex-1'} py-4 rounded-xl font-bold text-base md:text-lg
+                        transition-all duration-300 flex items-center justify-center gap-2
+                        ${
+                          !isDisabled
+                            ? 'bg-[#3498DB] text-white hover:bg-[#246a99] shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }
+                        ${currentStep > 1 ? 'flex-1' : 'w-full'}
+                      `}
+                    >
+                      Continue
+                    </button>
+                  )
                 }
-                      ${currentStep > 1 ? 'flex-1' : 'w-full'}
-              `}
-            >
-                    {isSubmitStep && isSubmitting ? (
-                      <>
-                        <Loader2 size={20} className="animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      currentStep === 17 ? 'Submit Details' : 'Continue'
-                    )}
-            </button>
-                )
-              }
-              return null
-            })()}
-          </div>
+                return null
+              })()}
+            </div>
+          )}
         </div>
 
         {/* Redirect Button - Only show on step 1, outside the card */}
