@@ -355,7 +355,7 @@ export default function ThankYouPage() {
                 </div>
 
                 {/* Fact/Stat */}
-                <div className="bg-blue-50 rounded-lg p-4 mb-4 border-2 border-blue-200">
+                <div className="bg-blue-50 rounded-lg p-4 mt-4 border-2 border-blue-200">
                   <p className="text-xs md:text-sm font-bold text-blue-900 mb-1 text-center">
                     💡 Did You Know?
                   </p>
@@ -513,7 +513,7 @@ export default function ThankYouPage() {
                 </div>
 
                 {/* Fact/Stat */}
-                <div className="bg-blue-50 rounded-lg p-4 mb-4 border-2 border-blue-200">
+                <div className="bg-blue-50 rounded-lg p-4 mt-4 border-2 border-blue-200">
                   <p className="text-xs md:text-sm font-bold text-blue-900 mb-1 text-center">
                     💡 Did You Know?
                   </p>
