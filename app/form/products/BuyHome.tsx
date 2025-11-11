@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { ArrowLeft, Home, Loader2 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { RangeSlider, StateDropdown, TextInput, ZipCodeInput, PhoneInput, RadioButtonGroup, type RadioOption } from '@/components/ui'
 import ProgressBar from '@/components/ui/ProgressBar'
 import { validateZipCode, validateEmail, validateName, validateAddress, validateCity, validatePhoneNumber } from '@/utils/validation'
@@ -10,10 +10,10 @@ import Link from 'next/link'
 
 const BuyHome = () => {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isInitialized, setIsInitialized] = useState(false)
   const [formData, setFormData] = useState({
     productType: 'PP_NEWHOME',
     state: '',
@@ -38,8 +38,62 @@ const BuyHome = () => {
     phoneNumber: '',
   })
 
-  // Store addressZip from URL or localStorage (this is separate from propertyZipCode)
-  // We'll use this in form submission
+  // Load form data and current step from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isInitialized) {
+      try {
+        const savedFormData = localStorage.getItem('buyhome_form_data')
+        const savedCurrentStep = localStorage.getItem('buyhome_current_step')
+        
+        if (savedFormData) {
+          const parsedData = JSON.parse(savedFormData)
+          setFormData(prev => ({ ...prev, ...parsedData }))
+        }
+        
+        // Zip code is stored in localStorage from Hero.tsx, no need to check URL params
+        
+        if (savedCurrentStep) {
+          const step = parseInt(savedCurrentStep, 10)
+          if (step >= 1 && step <= 17) {
+            setCurrentStep(step)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading form data from localStorage:', error)
+      }
+      setIsInitialized(true)
+    }
+  }, [isInitialized])
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isInitialized) {
+      try {
+        localStorage.setItem('buyhome_form_data', JSON.stringify(formData))
+      } catch (error) {
+        console.error('Error saving form data to localStorage:', error)
+      }
+    }
+  }, [formData, isInitialized])
+
+  // Save current step to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isInitialized) {
+      try {
+        localStorage.setItem('buyhome_current_step', currentStep.toString())
+      } catch (error) {
+        console.error('Error saving current step to localStorage:', error)
+      }
+    }
+  }, [currentStep, isInitialized])
+
+  // Clear localStorage on successful submission
+  const clearFormData = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('buyhome_form_data')
+      localStorage.removeItem('buyhome_current_step')
+    }
+  }
 
   const handleInputChange = (field: string, value: string | number, autoAdvance = false) => {
     // Capture current step before state update
@@ -109,50 +163,21 @@ const BuyHome = () => {
     return validation.valid
   }
 
-  // Handler for redirecting to refinance form with zip code from localStorage
+  // Handler for redirecting to refinance form (zip code stored in localStorage)
   const handleRedirectToRefinance = () => {
-    // Get zip code from localStorage first (stored when user clicks Continue in Hero)
-    let zipCode = ''
-    
-    if (typeof window !== 'undefined') {
-      const storedZip = localStorage.getItem('zip_code')
-      if (storedZip && storedZip.length === 5) {
-        zipCode = storedZip
-      }
-    }
-    
-    // Fallback to URL params if localStorage doesn't have it
-    if (!zipCode) {
-      const urlZip = searchParams.get('zip_code')
-      if (urlZip && urlZip.length === 5) {
-        zipCode = urlZip
-      }
-    }
-    
-    // Build redirect URL with zip code if available
-    const redirectUrl = zipCode 
-      ? `/form/refinance?zip_code=${zipCode}`
-      : '/form/refinance'
-    
-    router.push(redirectUrl)
+    // Zip code is already stored in localStorage from Hero.tsx
+    // No need to pass it in URL
+    router.push('/form/refinance')
   }
-
-  // Initialize zip code from URL and store in localStorage when component mounts
-  useEffect(() => {
-    const urlZip = searchParams.get('zip_code')
-    if (urlZip && urlZip.length === 5) {
-      // Store in localStorage for button redirect
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('zip_code', urlZip)
-      }
-    }
-  }, [searchParams])
 
   const handleNext = async () => {
     if (isStepValid()) {
       if (currentStep === 17) {
         // Submit form - Bypass LeadProsper submission, directly redirect to thank you page
         setIsSubmitting(true)
+        
+        // Clear form data from localStorage on successful submission
+        clearFormData()
         
         // Direct redirect to thank you page
         router.push('/thankyou')

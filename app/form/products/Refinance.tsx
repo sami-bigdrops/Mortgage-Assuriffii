@@ -2,18 +2,18 @@
 
 import React, { useState, useEffect } from 'react'
 import { ArrowLeft, DollarSign, Loader2 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { ZipCodeInput, RadioButtonGroup, RangeSlider, TextInput, StateDropdown, PhoneInput, type RadioOption } from '@/components/ui'
+import { useRouter } from 'next/navigation'
+import { RadioButtonGroup, RangeSlider, TextInput, StateDropdown, PhoneInput, type RadioOption } from '@/components/ui'
 import ProgressBar from '@/components/ui/ProgressBar'
 import { validateZipCode, validateEmail, validateName, validateAddress, validateCity, validatePhoneNumber } from '@/utils/validation'
 import Link from 'next/link'
 
 const Refinance = () => {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isInitialized, setIsInitialized] = useState(false)
   const [formData, setFormData] = useState({
     productType: 'PP_REFI',
     zipCode: '',
@@ -40,6 +40,77 @@ const Refinance = () => {
     addressState: '',
     phoneNumber: '',
   })
+
+  // Load form data and current step from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isInitialized) {
+      try {
+        const savedFormData = localStorage.getItem('refinance_form_data')
+        const savedCurrentStep = localStorage.getItem('refinance_current_step')
+        
+        if (savedFormData) {
+          const parsedData = JSON.parse(savedFormData)
+          setFormData(prev => ({ ...prev, ...parsedData }))
+          
+          // Get zip code from localStorage if not in saved form data
+          if (typeof window !== 'undefined' && !parsedData.zipCode) {
+            const storedZip = localStorage.getItem('zip_code')
+            if (storedZip && storedZip.length === 5) {
+              setFormData(prev => ({ ...prev, zipCode: storedZip }))
+            }
+          }
+        } else {
+          // If no saved form data, get zip code from localStorage
+          if (typeof window !== 'undefined') {
+            const storedZip = localStorage.getItem('zip_code')
+            if (storedZip && storedZip.length === 5) {
+              setFormData(prev => ({ ...prev, zipCode: storedZip }))
+            }
+          }
+        }
+        
+        if (savedCurrentStep) {
+          const step = parseInt(savedCurrentStep, 10)
+          if (step >= 1 && step <= 19) {
+            setCurrentStep(step)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading form data from localStorage:', error)
+      }
+      setIsInitialized(true)
+    }
+  }, [isInitialized])
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isInitialized) {
+      try {
+        localStorage.setItem('refinance_form_data', JSON.stringify(formData))
+      } catch (error) {
+        console.error('Error saving form data to localStorage:', error)
+      }
+    }
+  }, [formData, isInitialized])
+
+  // Save current step to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isInitialized) {
+      try {
+        localStorage.setItem('refinance_current_step', currentStep.toString())
+      } catch (error) {
+        console.error('Error saving current step to localStorage:', error)
+      }
+    }
+  }, [currentStep, isInitialized])
+
+  // Clear localStorage on successful submission
+  const clearFormData = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('refinance_form_data')
+      localStorage.removeItem('refinance_current_step')
+    }
+  }
 
   const handleInputChange = (field: string, value: string | number, autoAdvance = false) => {
     setFormData(prev => ({
@@ -108,9 +179,12 @@ const Refinance = () => {
 
   const handleNext = async () => {
     if (isStepValid()) {
-      if (currentStep === 20) {
+      if (currentStep === 19) {
         // Submit form - Bypass LeadProsper submission, directly redirect to thank you page
         setIsSubmitting(true)
+        
+        // Clear form data from localStorage on successful submission
+        clearFormData()
         
         // Direct redirect to thank you page
         router.push('/thankyou')
@@ -170,9 +244,9 @@ const Refinance = () => {
 
   const handleBack = () => {
     setCurrentStep(prev => {
-      // If on step 11 and user selected "No" for secondMortgage, go back to step 8
-      if (prev === 11 && formData.secondMortgage === 'no') {
-        return 8
+      // If on step 10 and user selected "No" for secondMortgage, go back to step 7
+      if (prev === 10 && formData.secondMortgage === 'no') {
+        return 7
       }
       // Otherwise, go back one step normally
       return prev - 1
@@ -182,47 +256,45 @@ const Refinance = () => {
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
-        return validateZipCode(formData.zipCode).valid && !errors.zipCode
-      case 2:
         return formData.propertyType !== ''
-      case 3:
+      case 2:
         return formData.propertyPurpose !== ''
-      case 4:
+      case 3:
         return formData.creditGrade !== ''
-      case 5:
+      case 4:
         return formData.estimatedHomeValue > 0
-      case 6:
+      case 5:
         return formData.mortgageBalance > 0 && formData.mortgageBalance <= formData.estimatedHomeValue
-      case 7:
+      case 6:
         return formData.firstMortgageInterest >= 3 && formData.firstMortgageInterest <= 24
-      case 8:
+      case 7:
         return formData.secondMortgage !== ''
-      case 9:
+      case 8:
         return formData.secondMortgageBalance >= 0 && formData.secondMortgageBalance <= 3000000
-      case 10:
+      case 9:
         return formData.secondMortgageInterest >= 0 && formData.secondMortgageInterest <= 24
-      case 11:
+      case 10:
         return formData.additionalCash >= 0 && formData.additionalCash <= 2000000
-      case 12:
+      case 11:
         return formData.loanType !== ''
-      case 13:
+      case 12:
         return formData.bankruptcyOrForeclosure !== ''
-      case 14:
+      case 13:
         return formData.currentlyEmployed !== ''
-      case 15:
+      case 14:
         return formData.lateMortgagePayments !== ''
-      case 16:
+      case 15:
         return formData.veteranStatus !== ''
-      case 17:
+      case 16:
         return validateEmail(formData.email).valid && !errors.email
-      case 18:
+      case 17:
         return (
           validateName(formData.firstName, 'First name').valid &&
           validateName(formData.lastName, 'Last name').valid &&
           !errors.firstName &&
           !errors.lastName
         )
-      case 19:
+      case 18:
         return (
           validateAddress(formData.address).valid &&
           validateCity(formData.city).valid &&
@@ -230,7 +302,7 @@ const Refinance = () => {
           !errors.address &&
           !errors.city
         )
-      case 20:
+      case 19:
         return validatePhoneNumber(formData.phoneNumber).valid && !errors.phoneNumber
       default:
         return false
@@ -238,37 +310,11 @@ const Refinance = () => {
   }
 
 
-  // Handler for redirecting to buy-home form with zip code from localStorage
+  // Handler for redirecting to buy-home form (zip code stored in localStorage)
   const handleRedirectToBuyHome = () => {
-    // Get zip code from localStorage first (stored when user clicks Continue in Hero)
-    let zipCode = ''
-    
-    if (typeof window !== 'undefined') {
-      const storedZip = localStorage.getItem('zip_code')
-      if (storedZip && storedZip.length === 5) {
-        zipCode = storedZip
-      }
-    }
-    
-    // Fallback to URL params if localStorage doesn't have it
-    if (!zipCode) {
-      const urlZip = searchParams.get('zip_code')
-      if (urlZip && urlZip.length === 5) {
-        zipCode = urlZip
-      }
-    }
-    
-    // Final fallback to formData.zipCode
-    if (!zipCode && formData.zipCode && formData.zipCode.length === 5) {
-      zipCode = formData.zipCode
-    }
-    
-    // Build redirect URL with zip code if available
-    const redirectUrl = zipCode 
-      ? `/form/buy-home?zip_code=${zipCode}`
-      : '/form/buy-home'
-    
-    router.push(redirectUrl)
+    // Zip code is already stored in localStorage from Hero.tsx
+    // No need to pass it in URL
+    router.push('/form/buy-home')
   }
 
   // Calculate default mortgage balance (70% of estimated home value)
@@ -328,20 +374,9 @@ const Refinance = () => {
     return `$${val.toLocaleString()}`
   }
 
-  // Initialize zip code from URL and store in localStorage when component mounts
+  // Initialize mortgage balance to 70% of estimated home value when step 5 is reached
   useEffect(() => {
-    const urlZip = searchParams.get('zip_code')
-    if (urlZip && urlZip.length === 5) {
-      // Store in localStorage for button redirect
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('zip_code', urlZip)
-      }
-    }
-  }, [searchParams])
-
-  // Initialize mortgage balance to 70% of estimated home value when step 6 is reached
-  useEffect(() => {
-    if (currentStep === 6 && formData.mortgageBalance === 0) {
+    if (currentStep === 5 && formData.mortgageBalance === 0) {
       const defaultBalance = Math.round(formData.estimatedHomeValue * 0.7)
       setFormData(prev => ({
         ...prev,
@@ -350,10 +385,10 @@ const Refinance = () => {
     }
   }, [currentStep, formData.estimatedHomeValue, formData.mortgageBalance])
 
-  // Initialize additional cash to 80% of home value minus mortgage balances when step 11 is reached
+  // Initialize additional cash to 80% of home value minus mortgage balances when step 10 is reached
   // Formula: additionalCash = (80% × estimatedHomeValue) - (mortgageBalance + secondMortgageBalance)
   useEffect(() => {
-    if (currentStep === 11) {
+    if (currentStep === 10) {
       // Always recalculate based on current values: 80% of EST_VAL minus (BAL_ONE + BAL_TWO)
       const maxLoanAmount = Math.round(formData.estimatedHomeValue * 0.8)
       const totalMortgageBalances = formData.mortgageBalance + formData.secondMortgageBalance
@@ -431,35 +466,15 @@ const Refinance = () => {
         {/* Progress Indicator */}
         <ProgressBar 
           currentStep={currentStep}
-          totalSteps={20}
+          totalSteps={19}
           icon={<DollarSign size={20} className="text-[#3498DB]" />}
           formType="refinance"
         />
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-10">
-          {/* Step 1: Zip Code */}
+          {/* Step 1: Property Type */}
           {currentStep === 1 && (
-            <>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
-                What is your current zip code?
-              </h2>
-
-              <ZipCodeInput
-                id="zipCode"
-                label="Enter Zip Code"
-                value={formData.zipCode}
-                onChange={(value) => handleInputChange('zipCode', value)}
-                onBlur={() => validateField('zipCode', formData.zipCode)}
-                error={errors.zipCode}
-                required
-                className="mb-8"
-              />
-            </>
-          )}
-
-          {/* Step 2: Property Type */}
-          {currentStep === 2 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What type of property are you refinancing?
@@ -476,8 +491,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 3: Property Purpose */}
-          {currentStep === 3 && (
+          {/* Step 2: Property Purpose */}
+          {currentStep === 2 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What is the purpose of this property?
@@ -494,8 +509,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 4: Credit Grade */}
-          {currentStep === 4 && (
+          {/* Step 3: Credit Grade */}
+          {currentStep === 3 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What is your estimated credit score?
@@ -512,8 +527,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 5: Estimated Home Value */}
-          {currentStep === 5 && (
+          {/* Step 4: Estimated Home Value */}
+          {currentStep === 4 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What is your estimated home value?
@@ -532,8 +547,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 6: Mortgage Balance */}
-          {currentStep === 6 && (
+          {/* Step 5: Mortgage Balance */}
+          {currentStep === 5 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What is your current mortgage balance?
@@ -565,8 +580,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 7: First Mortgage Interest Rate */}
-          {currentStep === 7 && (
+          {/* Step 6: First Mortgage Interest Rate */}
+          {currentStep === 6 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What is your current first mortgage interest rate?
@@ -587,8 +602,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 8: Second Mortgage */}
-          {currentStep === 8 && (
+          {/* Step 7: Second Mortgage */}
+          {currentStep === 7 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 Do you have a 2nd Mortgage?
@@ -600,10 +615,10 @@ const Refinance = () => {
                 value={formData.secondMortgage}
                 onChange={(value) => {
                   handleInputChange('secondMortgage', value, false)
-                  // If "No" is selected, skip to step 11 (additionalCash)
-                  // If "Yes" is selected, go to step 9 (secondMortgageBalance)
+                  // If "No" is selected, skip to step 10 (additionalCash)
+                  // If "Yes" is selected, go to step 8 (secondMortgageBalance)
                   setTimeout(() => {
-                    setCurrentStep(value === 'no' ? 11 : 9)
+                    setCurrentStep(value === 'no' ? 10 : 8)
                   }, 150)
                 }}
                 required
@@ -612,8 +627,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 9: Second Mortgage Balance */}
-          {currentStep === 9 && (
+          {/* Step 8: Second Mortgage Balance */}
+          {currentStep === 8 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What is your current second mortgage balance?
@@ -634,8 +649,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 10: Second Mortgage Interest Rate */}
-          {currentStep === 10 && (
+          {/* Step 9: Second Mortgage Interest Rate */}
+          {currentStep === 9 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What is your current second mortgage interest rate?
@@ -656,8 +671,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 11: Additional Cash */}
-          {currentStep === 11 && (
+          {/* Step 10: Additional Cash */}
+          {currentStep === 10 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 How much additional cash do you wish to borrow?
@@ -678,8 +693,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 12: Loan Type */}
-          {currentStep === 12 && (
+          {/* Step 11: Loan Type */}
+          {currentStep === 11 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What type of interest rate do you prefer?
@@ -696,8 +711,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 13: Bankruptcy or Foreclosure */}
-          {currentStep === 13 && (
+          {/* Step 12: Bankruptcy or Foreclosure */}
+          {currentStep === 12 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 Have you been in bankruptcy or foreclosure in the past three years?
@@ -714,8 +729,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 14: Currently Employed */}
-          {currentStep === 14 && (
+          {/* Step 13: Currently Employed */}
+          {currentStep === 13 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 Are you currently employed?
@@ -732,8 +747,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 15: Late Mortgage Payments */}
-          {currentStep === 15 && (
+          {/* Step 14: Late Mortgage Payments */}
+          {currentStep === 14 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 Any late mortgage payments in the past year?
@@ -751,8 +766,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 16: Veteran Status */}
-          {currentStep === 16 && (
+          {/* Step 15: Veteran Status */}
+          {currentStep === 15 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 You or spouse a servicemember or veteran?
@@ -769,8 +784,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 17: Email */}
-          {currentStep === 17 && (
+          {/* Step 16: Email */}
+          {currentStep === 16 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What&apos;s your email address?
@@ -791,8 +806,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 18: First Name and Last Name */}
-          {currentStep === 18 && (
+          {/* Step 17: First Name and Last Name */}
+          {currentStep === 17 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What&apos;s your name?
@@ -825,8 +840,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 19: Address, City, State */}
-          {currentStep === 19 && (
+          {/* Step 18: Address, City, State */}
+          {currentStep === 18 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What&apos;s your address?
@@ -870,8 +885,8 @@ const Refinance = () => {
             </>
           )}
 
-          {/* Step 20: Phone Number and Submit */}
-          {currentStep === 20 && (
+          {/* Step 19: Phone Number and Submit */}
+          {currentStep === 19 && (
             <>
               <h2 className="text-2xl md:text-3xl font-bold text-[#246a99] mb-8 md:mb-10 font-sans">
                 What&apos;s your phone number?
@@ -888,7 +903,7 @@ const Refinance = () => {
                 className="mb-8"
               />
 
-              {/* Navigation Buttons - Step 20 */}
+              {/* Navigation Buttons - Step 19 */}
               <div className="flex gap-4 mb-8">
                 {currentStep > 1 && (
                   <button
@@ -935,7 +950,7 @@ const Refinance = () => {
           )}
 
           {/* Navigation Buttons - All other steps */}
-          {currentStep !== 20 && (
+          {currentStep !== 19 && (
             <div className="flex gap-4">
             {currentStep > 1 && (
               <button
@@ -950,11 +965,11 @@ const Refinance = () => {
             )}
             {/* Only show Continue/Submit button for steps without radio buttons */}
             {(() => {
-              // Steps with radio buttons that auto-advance: 2, 3, 4, 8, 12, 13, 14, 15, 16
-              const radioButtonSteps = [2, 3, 4, 8, 12, 13, 14, 15, 16]
+              // Steps with radio buttons that auto-advance: 1, 2, 3, 7, 11, 12, 13, 14, 15
+              const radioButtonSteps = [1, 2, 3, 7, 11, 12, 13, 14, 15]
               const hasRadioButton = radioButtonSteps.includes(currentStep)
               
-              // Show button for steps without radio buttons (step 20 is handled separately)
+              // Show button for steps without radio buttons (step 19 is handled separately)
               if (!hasRadioButton) {
                 const isDisabled = !isStepValid()
                 return (

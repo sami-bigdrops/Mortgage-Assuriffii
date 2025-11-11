@@ -74,23 +74,28 @@ const Hero = () => {
       return
     }
 
+    // Store zip code in localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('zip_code', zipCode)
+    }
+
     // Get UTM parameters from cookies
     const utmSource = getCookie('utm_source') || ''
     const utmId = getCookie('utm_id') || ''
     const utmS1 = getCookie('utm_s1') || ''
 
-    // Build the redirect URL
+    // Build the redirect URL (without zip_code)
     const baseUrl = '/form/refinance'
-    const params = new URLSearchParams({
-      zip_code: zipCode,
-    })
+    const params = new URLSearchParams()
 
     // Map UTM parameters to affiliate tracking parameters
     if (utmSource) params.set('subid', utmSource)
     if (utmId) params.set('subid2', utmId)
     if (utmS1) params.set('c1', utmS1)
 
-    const redirectUrl = `${baseUrl}?${params.toString()}`
+    const redirectUrl = params.toString() 
+      ? `${baseUrl}?${params.toString()}`
+      : baseUrl
     
     // Redirect to the quote page
     window.location.href = redirectUrl
