@@ -236,16 +236,6 @@ export default function ThankYouPage() {
                   Compare rates from top lenders and drive away with your dream car today!
                 </p>
 
-                {/* Fact/Stat */}
-                <div className="bg-blue-50 rounded-lg p-4 mb-4 border-2 border-blue-200">
-                  <p className="text-xs md:text-sm font-bold text-blue-900 mb-1 text-center">
-                    💡 Did You Know?
-                  </p>
-                  <p className="text-sm md:text-base text-blue-800 text-center font-semibold">
-                    Our customers save an average of $610/year on auto insurance
-                  </p>
-                </div>
-
                 {/* Mobile: Stacked layout */}
                 <div className="block sm:hidden space-y-4">
                   <input
@@ -363,6 +353,16 @@ export default function ThankYouPage() {
                     <p className="mt-2 text-sm text-red-600 font-medium">{autoZipCodeError}</p>
                   )}
                 </div>
+
+                {/* Fact/Stat */}
+                <div className="bg-blue-50 rounded-lg p-4 mb-4 border-2 border-blue-200">
+                  <p className="text-xs md:text-sm font-bold text-blue-900 mb-1 text-center">
+                    💡 Did You Know?
+                  </p>
+                  <p className="text-sm md:text-base text-blue-800 text-center font-semibold">
+                    Our customers save an average of $610/year on auto insurance
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -393,16 +393,6 @@ export default function ThankYouPage() {
                   Protect your biggest investment with comprehensive home insurance. 
                   Get instant quotes and save on your home protection coverage.
                 </p>
-
-                {/* Fact/Stat */}
-                <div className="bg-blue-50 rounded-lg p-4 mb-4 border-2 border-blue-200">
-                  <p className="text-xs md:text-sm font-bold text-blue-900 mb-1 text-center">
-                    💡 Did You Know?
-                  </p>
-                  <p className="text-sm md:text-base text-blue-800 text-center font-semibold">
-                    Over 50,000 homes protected with our comprehensive coverage
-                  </p>
-                </div>
 
                 {/* Mobile: Stacked layout */}
                 <div className="block sm:hidden space-y-4">
@@ -520,6 +510,16 @@ export default function ThankYouPage() {
                   {homeZipCodeError && (
                     <p className="mt-2 text-sm text-red-600 font-medium">{homeZipCodeError}</p>
                   )}
+                </div>
+
+                {/* Fact/Stat */}
+                <div className="bg-blue-50 rounded-lg p-4 mb-4 border-2 border-blue-200">
+                  <p className="text-xs md:text-sm font-bold text-blue-900 mb-1 text-center">
+                    💡 Did You Know?
+                  </p>
+                  <p className="text-sm md:text-base text-blue-800 text-center font-semibold">
+                    Over 50,000 homes protected with our comprehensive coverage
+                  </p>
                 </div>
               </div>
             </div>
