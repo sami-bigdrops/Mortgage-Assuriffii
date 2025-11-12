@@ -84,18 +84,18 @@ const Hero = () => {
     const utmId = getCookie('utm_id') || ''
     const utmS1 = getCookie('utm_s1') || ''
 
-    // Build the redirect URL (without zip_code)
+    // Build the redirect URL with zip_code
     const baseUrl = '/form/refinance'
-    const params = new URLSearchParams()
+    const params = new URLSearchParams({
+      zip_code: zipCode,
+    })
 
     // Map UTM parameters to affiliate tracking parameters
     if (utmSource) params.set('subid', utmSource)
     if (utmId) params.set('subid2', utmId)
     if (utmS1) params.set('c1', utmS1)
 
-    const redirectUrl = params.toString() 
-      ? `${baseUrl}?${params.toString()}`
-      : baseUrl
+    const redirectUrl = `${baseUrl}?${params.toString()}`
     
     // Redirect to the quote page
     window.location.href = redirectUrl

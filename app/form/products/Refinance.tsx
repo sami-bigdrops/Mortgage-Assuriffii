@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { ArrowLeft, DollarSign, Loader2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { RadioButtonGroup, RangeSlider, TextInput, StateDropdown, PhoneInput, type RadioOption } from '@/components/ui'
 import ProgressBar from '@/components/ui/ProgressBar'
 import { validateZipCode, validateEmail, validateName, validateAddress, validateCity, validatePhoneNumber } from '@/utils/validation'
@@ -10,6 +10,7 @@ import Link from 'next/link'
 
 const Refinance = () => {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -51,20 +52,34 @@ const Refinance = () => {
         if (savedFormData) {
           const parsedData = JSON.parse(savedFormData)
           setFormData(prev => ({ ...prev, ...parsedData }))
-          
-          // Get zip code from localStorage if not in saved form data
-          if (typeof window !== 'undefined' && !parsedData.zipCode) {
-            const storedZip = localStorage.getItem('zip_code')
-            if (storedZip && storedZip.length === 5) {
-              setFormData(prev => ({ ...prev, zipCode: storedZip }))
+        }
+        
+        // Check URL params for zip_code if not in saved data
+        const urlZip = searchParams.get('zip_code')
+        if (urlZip && urlZip.length === 5) {
+          setFormData(prev => {
+            // Only update if zipCode is empty or different
+            if (!prev.zipCode || prev.zipCode !== urlZip) {
+              return { ...prev, zipCode: urlZip }
             }
-          }
+            return prev
+          })
+          // Store in localStorage for button redirect
+          localStorage.setItem('zip_code', urlZip)
         } else {
-          // If no saved form data, get zip code from localStorage
+          // If no URL zip, get from localStorage (only if not in saved form data)
           if (typeof window !== 'undefined') {
-            const storedZip = localStorage.getItem('zip_code')
-            if (storedZip && storedZip.length === 5) {
-              setFormData(prev => ({ ...prev, zipCode: storedZip }))
+            const hasZipInSavedData = savedFormData ? JSON.parse(savedFormData).zipCode : false
+            if (!hasZipInSavedData) {
+              const storedZip = localStorage.getItem('zip_code')
+              if (storedZip && storedZip.length === 5) {
+                setFormData(prev => {
+                  if (!prev.zipCode) {
+                    return { ...prev, zipCode: storedZip }
+                  }
+                  return prev
+                })
+              }
             }
           }
         }
@@ -80,7 +95,7 @@ const Refinance = () => {
       }
       setIsInitialized(true)
     }
-  }, [isInitialized])
+  }, [isInitialized, searchParams])
 
   // Save form data to localStorage whenever it changes
   useEffect(() => {
@@ -310,11 +325,37 @@ const Refinance = () => {
   }
 
 
-  // Handler for redirecting to buy-home form (zip code stored in localStorage)
+  // Handler for redirecting to buy-home form with zip code from localStorage
   const handleRedirectToBuyHome = () => {
-    // Zip code is already stored in localStorage from Hero.tsx
-    // No need to pass it in URL
-    router.push('/form/buy-home')
+    // Get zip code from localStorage first (stored when user clicks Continue in Hero)
+    let zipCode = ''
+    
+    if (typeof window !== 'undefined') {
+      const storedZip = localStorage.getItem('zip_code')
+      if (storedZip && storedZip.length === 5) {
+        zipCode = storedZip
+      }
+    }
+    
+    // Fallback to URL params if localStorage doesn't have it
+    if (!zipCode) {
+      const urlZip = searchParams.get('zip_code')
+      if (urlZip && urlZip.length === 5) {
+        zipCode = urlZip
+      }
+    }
+    
+    // Final fallback to formData.zipCode
+    if (!zipCode && formData.zipCode && formData.zipCode.length === 5) {
+      zipCode = formData.zipCode
+    }
+    
+    // Build redirect URL with zip code if available
+    const redirectUrl = zipCode 
+      ? `/form/buy-home?zip_code=${zipCode}`
+      : '/form/buy-home'
+    
+    router.push(redirectUrl)
   }
 
   // Calculate default mortgage balance (70% of estimated home value)
